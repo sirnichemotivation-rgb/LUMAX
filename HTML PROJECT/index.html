@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modern Responsive UI</title>
+  <style>
+    :root {
+      /* position and responsive size controls */
+      --dropdown-min-width: 140px;
+      --dropdown-vw: 25vw;
+      --dropdown-max-width: 280px;
+
+      color-scheme: dark;
+      --bg: #060a14;
+      --surface: rgba(255, 255, 255, 0.08);
+      --surface-strong: rgba(255, 255, 255, 0.12);
+      --text: #eef2ff;
+      --muted: #9ca3af;
+      --accent: #7c3aed;
+      --accent-soft: rgba(124, 58, 237, 0.18);
+      --border: rgba(255, 255, 255, 0.12);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      position: relative; /* use this for absolute center text */
+      min-height: 100vh;
+      background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.24), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.16), transparent 28%),
+        linear-gradient(180deg, #05080f 0%, #0d131f 100%);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    .center-title {
+      position: relative;
+      top: auto;
+      left: auto;
+      transform: none;
+      text-align: center;
+      font-size: clamp(32px, 8vw, 100px);
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -1px;
+      color: rgba(255, 255, 255, 0.92);
+      white-space: normal;
+      width: min(90vw, 1000px);
+      overflow: visible;
+      text-overflow: unset;
+      word-break: normal;
+      z-index: 15;
+      text-shadow: 0 0 50px rgba(124, 58, 237, 0.35);
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* PC Styles (default) */
+    .page {
+      min-height: 100vh;
+      padding: 120px 24px 24px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .dropdown-area {
+      position: relative;
+      display: flex;
+      justify-content: flex-start;
+      width: 100%;
+      max-width: 100%;
+      padding-left: 10%;
+      margin-top: 10px;
+    }
+
+    .dropdown-button {
+      min-width: var(--dropdown-min-width);
+      width: clamp(var(--dropdown-min-width), var(--dropdown-vw), var(--dropdown-max-width));
+      max-width: var(--dropdown-max-width);
+      padding: 12px 18px;
+      font-size: 1rem;
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-button {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease, transform 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dropdown-link {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font: inherit;
+      text-align: left;
+      padding: 12px 18px;
+      cursor: pointer;
+      display: block;
+      transition: background 0.2s ease;
+    }
+
+    .dropdown-link:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .dropdown-button:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      margin-top: 10px;
+      width: max-content;
+      min-width: 200px;
+      background: rgba(10, 14, 24, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 10px 0;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(18px);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(8px);
+      transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+      z-index: 10;
+    }
+
+    .dropdown-menu.open,
+    .dropdown:hover .dropdown-menu {
+      display: block;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .dropdown-menu a,
+    .dropdown-menu button {
+      display: block;
+      padding: 12px 18px;
+      color: var(--text);
+      font-weight: 500;
+      transition: background 0.2s ease;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+    }
+
+    .dropdown-menu a:hover,
+    .dropdown-menu button:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .dropdown-menu a:focus-visible,
+    .dropdown-menu button:focus-visible {
+      outline: none;
+      background: rgba(124, 58, 237, 0.18);
+    }
+
+    .restoration-page {
+      min-height: calc(100vh - 80px);
+      width: min(100%, 1100px);
+      margin: 0 auto;
+      padding: 14px 12px 20px;
+      background: rgba(10, 14, 24, 0.94);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 32px;
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(20px);
+      color: var(--text);
+      display: grid;
+      gap: 5px;
+    }
+
+    .restoration-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .restoration-panel {
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .restoration-input,
+    .restoration-select,
+    .restoration-textarea {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      color: #eef2ff;
+      padding: 14px 16px;
+      font: inherit;
+      resize: vertical;
+      box-shadow: none;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .restoration-input,
+    .restoration-select,
+    .restoration-textarea {
+      width: 100%;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      color: #eef2ff;
+      padding: 14px 16px;
+      font: inherit;
+      resize: vertical;
+      box-shadow: none;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .restoration-header {
+      display: none;
+    }
+
+    .restoration-row-3 {
+      display: grid;
+      gap: 4px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .restoration-row-2 {
+      display: grid;
+      gap: 4px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .restoration-label {
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    .restoration-input,
+    .restoration-select,
+    .restoration-textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      color: #eef2ff;
+      padding: 6px 8px;
+      font: inherit;
+      resize: vertical;
+      box-shadow: none;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .restoration-input:focus,
+    .restoration-select:focus,
+    .restoration-textarea:focus {
+      outline: none;
+      border-color: rgba(124, 58, 237, 0.7);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35), 0 0 0 3px rgba(124, 58, 237, 0.12);
+      background: rgba(18, 24, 38, 0.98);
+    }
+
+    .restoration-select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #ffffff 50%), linear-gradient(135deg, #ffffff 50%, transparent 50%);
+      background-position: calc(100% - 18px) calc(1em + 2px), calc(100% - 14px) calc(1em + 2px);
+      background-size: 8px 8px, 8px 8px;
+      background-repeat: no-repeat;
+      padding-right: 44px;
+    }
+
+    .restoration-textarea {
+      min-height: 120px;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    .restoration-copy {
+      margin-top: 8px;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      background: #eef2ff;
+      color: #05080f;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .restoration-copy:hover {
+      transform: translateY(-1px);
+      background: #ffffff;
+    }
+
+    .restoration-close {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(39, 41, 50, 0.95);
+      color: #f8fafc;
+      padding: 10px 18px;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    .restoration-content {
+      display: grid;
+      gap: 2px;
+    }
+
+    @media (max-width: 720px) {
+      .restoration-page {
+        min-height: auto;
+        padding: 14px;
+        border-radius: 24px;
+      }
+
+      .restoration-panel {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .restoration-page {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .center-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        width: min(80vw, 100%);
+      }
+
+      .dropdown-area {
+        justify-content: flex-start;
+        padding-left: 0;
+        width: 100%;
+      }
+
+      .dropdown-menu {
+        left: 0;
+        right: auto;
+        width: calc(100vw - 48px);
+      }
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+      align-items: center;
+      padding: 36px 0 16px;
+    }
+
+    .hero-content {
+      max-width: 680px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    .eyebrow::before {
+      content: "✨";
+    }
+
+    .hero-title {
+      font-size: clamp(2.55rem, 5vw, 4.5rem);
+      line-height: 0.98;
+      letter-spacing: -0.04em;
+      margin-bottom: 20px;
+    }
+
+    .hero-text {
+      font-size: 1.08rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+      max-width: 600px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .button {
+      border: none;
+      border-radius: 999px;
+      padding: 16px 24px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.23s ease, background 0.23s ease, box-shadow 0.23s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #7c3aed, #0ea5e9);
+      color: white;
+      box-shadow: 0 18px 40px rgba(124, 58, 237, 0.2);
+    }
+
+    .button-secondary {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: var(--text);
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .hero-visual {
+      position: relative;
+      min-height: 360px;
+      border-radius: 32px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(10, 14, 24, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), 0 30px 80px rgba(0, 0, 0, 0.25);
+    }
+
+    .hero-visual::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.28), transparent 22%),
+        radial-gradient(circle at 80% 15%, rgba(14, 165, 233, 0.16), transparent 18%);
+      pointer-events: none;
+    }
+
+    .hero-card {
+      position: absolute;
+      inset: 32px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      z-index: 1;
+      place-content: center;
+    }
+
+    .hero-panel {
+      background: rgba(15, 23, 42, 0.76);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+      padding: 24px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 38px 80px rgba(0, 0, 0, 0.18);
+    }
+
+    .hero-panel strong {
+      display: block;
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      color: #f8fafc;
+    }
+
+    .hero-panel p {
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 32px;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 22px;
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    .feature-card p {
+      color: var(--muted);
+      flex: 1;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 36px;
+    }
+
+    .stat {
+      padding: 22px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+
+    .stat span {
+      color: var(--muted);
+    }
+
+    .cards-section {
+      margin-top: 60px;
+      display: grid;
+      gap: 22px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .card-panel {
+      background: var(--surface);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-panel h3 {
+      margin-bottom: 16px;
+      font-size: 1.3rem;
+    }
+
+    .card-panel p {
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .small-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px;
+      padding: 20px;
+    }
+
+    .small-card h4 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .small-card p {
+      color: var(--muted);
+      font-size: 0.96rem;
+      line-height: 1.7;
+    }
+
+    .footer {
+      margin-top: 64px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 24px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* Tablet Styles */
+    @media (max-width: 980px) {
+      .feature-grid,
+      .stats,
+      .cards-section,
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        gap: 26px;
+      }
+
+      .hero-visual {
+        min-height: 320px;
+      }
+
+      .page {
+        padding: 100px 20px 20px;
+      }
+
+      .center-title {
+        font-size: clamp(20px, 7vw, 90px);
+        width: min(90vw, 100%);
+      }
+
+      .dropdown-area {
+        padding-left: 8%;
+        max-width: 100%;
+      }
+    }
+
+    /* Phone Styles */
+    @media (max-width: 720px) {
+      .page {
+        padding: 80px 16px 16px;
+      }
+
+      .dropdown-area {
+        max-width: 100%;
+        width: 100%;
+        padding-left: 0;
+      }
+
+      .dropdown-button {
+        width: 100%;
+        min-width: auto;
+      }
+
+      .dropdown-menu {
+        left: 0;
+        right: auto;
+        transform: none;
+        width: calc(100vw - 32px);
+        min-width: auto;
+      }
+
+      .center-title {
+        font-size: clamp(20px, 12vw, 30px);
+        width: 100%;
+        padding: 0 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page {
+        padding: 18px;
+      }
+
+      .topbar {
+        justify-content: center;
+      }
+
+      .hero-title {
+        font-size: clamp(2.1rem, 9vw, 3rem);
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .hero-panel {
+        padding: 20px;
+      }
+
+      .card-panel,
+      .feature-card,
+      .stat,
+      .small-card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="mainContent" class="page">
+    <div style="width:100%; display:flex; justify-content:center;">
+      <h1 class="center-title">LUMAX SCRIPT MANGER 1.0</h1>
+    </div>
+
+    <div id="landingSection">
+      <div class="dropdown-area">
+        <div class="dropdown">
+          <button class="dropdown-button" type="button" onclick="toggleDropdown()">niche sections</button>
+          <div id="dropdownMenu" class="dropdown-menu" role="menu">
+            <button class="dropdown-link" type="button" onclick="showCarRestoration(); closeDropdown()">Car Restoration</button>
+            <button class="dropdown-link" type="button" onclick="showKitchenRestoration(); closeDropdown()">Kitchen Restoration</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="restorationSection" class="restoration-page">
+      <div class="restoration-content">
+        <div class="restoration-row-3">
+          <div class="restoration-panel">
+            <span class="restoration-label">Car Model</span>
+            <input id="carModel" class="restoration-input" type="text" value="Hyundai N Vision 74, METALIC SILVER" oninput="updatePrompts()">
+          </div>
+          <div class="restoration-panel">
+            <span class="restoration-label">Logo Sign</span>
+            <input id="logoType" class="restoration-input" type="text" value="Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below" oninput="updatePrompts()">
+          </div>
+          <div class="restoration-panel">
+            <span class="restoration-label">Background</span>
+            <input id="bgType" class="restoration-input" type="text" value="A wide-angle, eye-level professional photograph of an industrial auto mechanic garage. The central area of the concrete floor is intentionally left empty and spacious to accommodate a car. The background wall is made of textured, dark gray bricks, creating a rugged look. The ceiling features two large, symmetrical clusters of glowing hexagonal LED light fixtures that perfectly frame the open center space. On the left and right sides, the shop is lined with organized clutter: heavy-duty metal shelving with auto parts, a blue tire changing machine, a professional workbench with a pegboard full of tools, a black rolling tool cabinet, and a welding cart. The concrete floor has realistic oil stains and a worn industrial texture. High-contrast, sharp focus, cinematic interior lighting, hyper-realistic, 8k resolution, vertical composition." oninput="updatePrompts()">
+          </div>
+        </div>
+        <div class="restoration-row-2">
+          <div class="restoration-panel">
+            <span class="restoration-label">Global Positive (Addon)</span>
+            <textarea id="globalPos" class="restoration-textarea" oninput="updatePrompts()">Pure ASMR, hyper-reaDlistic tactile texture focus, ultra-detailed workshop sounds ambiance, MECHANICS WORK DIFFRENT JOB,</textarea>
+          </div>
+          <div class="restoration-panel">
+            <span class="restoration-label">Global Negative (Addon)</span>
+            <textarea id="globalNeg" class="restoration-textarea" oninput="updatePrompts()">no more than 2 mechanics, woman, blurry, low quality, distorted, watermark, signature,no vocal, no background music. NO SAME WORK FOR MECHANICS</textarea>
+          </div>
+        </div>
+        <div class="restoration-panel">
+          <span class="restoration-label">Pumili ng Scene</span>
+          <select id="sceneSelect" class="restoration-select" onchange="loadSceneContent()"></select>
+          <div class="restoration-row-2">
+            <div>
+              <span class="restoration-label">Scene Positive Prompt</span>
+              <textarea id="scenePos" class="restoration-textarea" oninput="updatePrompts()"></textarea>
+            </div>
+            <div>
+              <span class="restoration-label">Scene Negative Prompt</span>
+              <textarea id="sceneNeg" class="restoration-textarea" oninput="updatePrompts()"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="restoration-panel">
+          <span class="restoration-label">Full Combined Prompt</span>
+          <textarea id="posArea" class="restoration-textarea" readonly></textarea>
+          <button id="copyBtn" type="button" class="restoration-copy" onclick="copyPrompts()">Copy All Prompts</button>
+        </div>
+      </div>
+    </div>
+
+    <textarea id="copyBuffer" class="hidden"></textarea>
+  </div>
+
+  <script>
+    function showCarRestoration() {
+      initCarRestoration();
+      document.getElementById('restorationSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function showKitchenRestoration() {
+      alert('Kitchen Restoration not yet implemented.');
+    }
+
+    document.addEventListener('DOMContentLoaded', initCarRestoration);
+
+    function toggleDropdown() {
+      const menu = document.getElementById('dropdownMenu');
+      if (!menu) return;
+      menu.classList.toggle('open');
+    }
+
+    function closeDropdown() {
+      const menu = document.getElementById('dropdownMenu');
+      if (!menu) return;
+      menu.classList.remove('open');
+    }
+
+    window.addEventListener('click', function(event) {
+      if (!event.target.closest('.dropdown')) {
+        closeDropdown();
+      }
+    });
+
+    const carSceneData = [
+      { title: "1. Initial Assessment", pos: "Cinematic, time-lapse style photograph of a heavily rusted, weathered, old {model}. The car is parked inside a garage, captured from a front-quarter angle facing towards the left side. No mechanics are present. The background features {wall}. Mounted centrally on the wall is a prominent neon sign: {logo}.{model}{wall}", neg: "mechanic, person, woman, clean car, shinyS paintD" },
+      { title: "2. Wheel Removal", pos: "Timelapse of Mechanics in charcoal grey 'LUMA X' polo shirts, black cargo pants, and leather aprons, no women, diverse builds., using pneumatic tools to remove rusted wheels of the same rusty 1969 Chevrolet Camaro, faded blue. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..{logo}.{model}{wall}", neg: "woman, blurry, low quality, distorted, watermark, signature, woman, female mechanic, clean car, new shiny paint, wheels attached, identical faces, different uniform, different background wall, missing neon sign, distorted text layout" },
+      { title: "3. Underbody Teardown", pos: "Timelapse of Mechanics in charcoal grey 'LUMA X' polo shirts, black cargo pants, and leather aprons, no women, diverse builds., lifting the rusty {model}, faded blue on a hydraulic rack for underbody teardown. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, car on the floor, woman, clean car, shiny paint, identical faces, different clothing, different background wall, missing neon sign, distorted text, incorrect car model." },
+      { title: "4. Engine Bay Teardown", pos: "Overhead timelapse of Mechanics in charcoal grey 'LUMA X' polo shirts, black cargo pants, and leather aprons, no women, diverse builds., using engine hoist to lift the rusty V8 engine out of the rusty {model}, faded blue. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, closed hood, woman, clean shiny engine, identical faces, different clothing, different background wall, missing neon sign, blurry text, modern engine." },
+      { title: "5. Welding Rust", pos: "Close-up timelapse of Mechanics in charcoal grey 'LUMA X' polo shirts, black cargo pants, and leather aprons, no women, diverse builds., performing professional welding on rusty floor panels of rusty {model}, faded blue. Bright sparks flying. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, woman, clean car, fully painted, no sparks, different uniform, missing apron, different background wall, missing neon sign, distorted logo, identical faces." },
+      { title: "6. Body Filler Application", pos: "Timelapse of Mechanics in charcoal grey 'LUMA X' polo shirts, black cargo pants, and leather aprons, no women, diverse builds., applying body filler to welded body panels of the rusty {model}, faded blue. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, clean glossy paint, no body filler, woman, identical faces, different clothing, different background wall, missing neon sign, incorrect car model." },
+      { title: "7. Masking Prep", pos: "Timelapse of Mechanics in charcoal grey 'LUMA X' polo shirts, black cargo pants, and leather aprons, no women, diverse builds., masking mirrors, glass, and trim of the rusty {model}, faded blue with paper. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, unmasked windows, glossy final paint, woman, different background wall, missing neon sign, incorrect car model, distorted text layout." },
+      { title: "8. Primer Application", pos: "Timelapse of Mechanics in charcoal grey 'LUMA X' polo shirts, black cargo pants, and leather aprons, no women, diverse builds., spraying gray primer over masilya and body of the rusty {model}, faded blue. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, rusty car, final shiny paint, woman, different background, missing neon sign, altered text, incorrect car model." },
+      { title: "9. Painting Booth", pos: "Timelapse of a professional male mechanic in white protective suit spraying deep blue metallic paint on the {model}, faded blue in a professional booth. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, charcoal grey polo shirt, leather apron, rusty car, matte finish, different background, missing neon sign, distorted logo, text typos." },
+      { title: "10. Unboxing Parts", pos: "Timelapse of Mechanics in charcoal grey 'LUMA X' polo shirts, black cargo pants, and leather aprons, no women, diverse builds., unboxing custom halo LED headlights, chrome trim, and new tires. {model}, faded blue shown without wheels. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, wheels on the car, old rusty parts, woman, identical faces, different background wall, missing neon sign, wrong car model, text typos." },
+      { title: "11. Installation", pos: "Close-up timelapse of Mechanics in charcoal grey 'LUMA X' polo shirts, black cargo pants, and leather aprons, no women, diverse builds., installing halo LED headlights and new tires onto the blue {model}, faded blue. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, car on jack stands, missing wheels, old rusty parts, woman, different background wall, missing neon sign, altered text." },
+      { title: "12. Buffing Finish", pos: "Timelapse of Mechanics in charcoal grey 'LUMA X' polo shirts, black cargo pants, and leather aprons, no women, diverse builds., using power buffers to polish the blue {model}, faded blue to mirror finish. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, woman, matte paint, dusty car, scratches, different background wall, missing neon sign, distorted text layout." },
+      { title: "13. Interior Reveal", pos: "Timelapse close-up inside the 1969 Chevrolet Camaro, faded blue showing a male mechanic in charcoal grey 'LUMA X' polo flipping headlight switch on dashboard. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, exterior car view, modern plastic dashboard, digital screens, different background wall, missing neon sign, altered text." },
+      { title: "14. Final Reveal", pos: "Cinematic night-time outdoor scene, fully restored blue {model}, faded blue, halo headlights glowing, under-chassis neon lights on, smoke from exhaust, dramatic lightning strikes in background. Text at bottom: '1{model}'. Industrial dark gray brick wall, gritty workshop aesthetic. SIGN: Large red neon X shape with central gold-outlined marquee-style lettering 'LUMA' in warm-white neon, smaller 'GARAGE' below, precise centered position, floating intense light structure against deep dark background..", neg: "woman, blurry, low quality, distorted, watermark, signature, rusty car, old paint, broken lights, no exhaust smoke, missing car model text, clear sunny day background, missing neon sign, altered text font, woman, mechanic." }
+    ];
+
+    function initCarRestoration() {
+      const select = document.getElementById('sceneSelect');
+      select.innerHTML = '';
+      carSceneData.forEach((s, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = s.title;
+        select.appendChild(opt);
+      });
+      loadSceneContent();
+    }
+
+    function loadSceneContent() {
+      const index = document.getElementById('sceneSelect').value;
+      document.getElementById('scenePos').value = carSceneData[index].pos;
+      document.getElementById('sceneNeg').value = carSceneData[index].neg;
+      updatePrompts();
+    }
+
+    function updatePrompts() {
+      const index = document.getElementById('sceneSelect').value;
+      carSceneData[index].pos = document.getElementById('scenePos').value;
+      carSceneData[index].neg = document.getElementById('sceneNeg').value;
+
+      const model = document.getElementById('carModel').value || "1969 Chevrolet Camaro";
+      const logo = document.getElementById('logoType').value || "LUMA neon";
+      const wall = document.getElementById('bgType').value || "Dark brick";
+      const gPos = document.getElementById('globalPos').value;
+      const gNeg = document.getElementById('globalNeg').value;
+      let posText = carSceneData[index].pos.replace(/{model}/g, model).replace(/{logo}/g, logo).replace(/{wall}/g, wall);
+      let negText = carSceneData[index].neg;
+      if (gPos) posText += ", " + gPos;
+      if (gNeg) negText += ", " + gNeg;
+      document.getElementById('posArea').value = "POSITIVE:\n" + posText + "\n\nNEGATIVE:\n" + negText;
+    }
+
+    function copyPrompts() {
+      const buffer = document.getElementById('copyBuffer');
+      buffer.value = document.getElementById('posArea').value;
+      buffer.classList.remove('hidden');
+      buffer.select();
+      document.execCommand('copy');
+      buffer.classList.add('hidden');
+      const btn = document.getElementById('copyBtn');
+      const originalText = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = originalText; }, 2000);
+    }
+  </script>
+</body>
+</html>
