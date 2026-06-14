@@ -269,6 +269,89 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .project-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .project-name-display {
+      padding: 6px 10px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      color: #eef2ff;
+      font-weight: 600;
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .project-dropdown-container {
+      position: relative;
+    }
+
+    .project-select {
+      min-width: 180px;
+      padding: 6px 10px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      color: #eef2ff;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .project-select option {
+      background: #05080f;
+      color: #eef2ff;
+    }
+
+    .project-new-btn {
+      padding: 8px 14px;
+      background: #4f46e5;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.85rem;
+      transition: background 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .project-new-btn:hover {
+      background: #4338ca;
+    }
+
+    .project-delete-btn {
+      padding: 8px 12px;
+      background: #ef4444;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: background 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .project-delete-btn:hover {
+      background: #dc2626;
+    }
+
+    .project-delete-btn:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+
     .restoration-row-2 {
       display: grid;
       gap: 4px;
@@ -342,6 +425,71 @@
     .restoration-copy:hover {
       transform: translateY(-1px);
       background: #ffffff;
+    }
+
+    .save-dropdown {
+      position: relative;
+      width: 100%;
+      display: inline-block;
+    }
+
+    .save-dropdown-button {
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      background: #eef2ff;
+      color: #05080f;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .save-dropdown-button:hover {
+      transform: translateY(-1px);
+      background: #ffffff;
+    }
+
+    .save-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background: #05080f;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .save-dropdown-menu.open {
+      display: block;
+    }
+
+    .save-dropdown-item {
+      display: block;
+      width: 100%;
+      padding: 12px 16px;
+      border: none;
+      background: transparent;
+      color: #eef2ff;
+      text-align: left;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      transition: background 0.2s ease;
+    }
+
+    .save-dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .save-dropdown-item:hover {
+      background: rgba(238, 242, 255, 0.1);
     }
 
     .restoration-close {
@@ -756,6 +904,16 @@
 
     <div id="restorationSection" class="restoration-page">
       <div class="restoration-content">
+        <div class="project-header">
+          <div class="project-name-display">📌 Project: <span id="currentProjectName">Car Restoration</span></div>
+          <div class="project-dropdown-container">
+            <select id="projectSelect" class="project-select" onchange="switchProject(this.value)">
+              <option value="Car Restoration">Car Restoration</option>
+            </select>
+          </div>
+          <button type="button" class="project-new-btn" onclick="createNewProject()">+ New Project</button>
+          <button type="button" id="projectDeleteBtn" class="project-delete-btn" onclick="deleteProject()">Delete</button>
+        </div>
         <div class="restoration-row-3">
           <div class="restoration-panel">
             <span class="restoration-label">Car Model</span>
@@ -797,15 +955,67 @@
         <div class="restoration-panel">
           <span class="restoration-label">Full Combined Prompt</span>
           <textarea id="posArea" class="restoration-textarea" readonly></textarea>
-          <button id="copyBtn" type="button" class="restoration-copy" onclick="copyPrompts()">Copy All Prompts</button>
+          <div class="restoration-actions">
+            <button id="copyBtn" type="button" class="restoration-copy" onclick="copyPrompts()">Copy All Prompts</button>
+            <div class="save-dropdown">
+              <button id="saveDropdownBtn" type="button" class="save-dropdown-button" onclick="toggleSaveDropdown()">📥 Save Options</button>
+              <div id="saveDropdownMenu" class="save-dropdown-menu">
+                <button type="button" class="save-dropdown-item" onclick="exportSceneData(); closeSaveDropdown()">Export JSON</button>
+                <button type="button" class="save-dropdown-item" onclick="document.getElementById('importFile').click(); closeSaveDropdown()">Import JSON</button>
+                <button type="button" class="save-dropdown-item" onclick="saveSceneDataToCloud(); closeSaveDropdown()">Save to Cloud</button>
+                <button type="button" class="save-dropdown-item" onclick="loadSceneDataFromCloud(); closeSaveDropdown()">Load from Cloud</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
+    <input id="importFile" type="file" accept="application/json" class="hidden" onchange="importSceneData(event)">
     <textarea id="copyBuffer" class="hidden"></textarea>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore-compat.js"></script>
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyAFG4ZU3WosdYTFHTHdk4oHROjNmdfo_xU",
+      authDomain: "html-lumax.firebaseapp.com",
+      projectId: "html-lumax",
+      storageBucket: "html-lumax.appspot.com",
+      messagingSenderId: "504154087621",
+      appId: "1:504154087621:web:17bda38111460fa48b90ac",
+      measurementId: "G-VP25X3C4S1"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const firestoreDoc = db.collection('lumax').doc('sharedScene');
+    let cloudSaveTimeout;
+    let currentProject = 'Car Restoration';
+    let projectsList = ['Car Restoration'];
+
+    function toggleSaveDropdown() {
+      const menu = document.getElementById('saveDropdownMenu');
+      if (menu) {
+        menu.classList.toggle('open');
+      }
+    }
+
+    function closeSaveDropdown() {
+      const menu = document.getElementById('saveDropdownMenu');
+      if (menu) {
+        menu.classList.remove('open');
+      }
+    }
+
+    window.addEventListener('click', function(event) {
+      const dropdown = document.querySelector('.save-dropdown');
+      if (!event.target.closest('.save-dropdown')) {
+        closeSaveDropdown();
+      }
+    });
+
     function showCarRestoration() {
       initCarRestoration();
       document.getElementById('restorationSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -861,6 +1071,8 @@
         opt.textContent = s.title;
         select.appendChild(opt);
       });
+      restoreProjectList();
+      restoreSavedData();
       loadSceneContent();
     }
 
@@ -869,6 +1081,7 @@
       document.getElementById('scenePos').value = carSceneData[index].pos;
       document.getElementById('sceneNeg').value = carSceneData[index].neg;
       updatePrompts();
+      saveSceneData();
     }
 
     function updatePrompts() {
@@ -886,6 +1099,251 @@
       if (gPos) posText += ", " + gPos;
       if (gNeg) negText += ", " + gNeg;
       document.getElementById('posArea').value = "POSITIVE:\n" + posText + "\n\nNEGATIVE:\n" + negText;
+      saveSceneData();
+      debouncedAutoSaveCloud();
+    }
+
+    function autoSaveCloud() {
+      if (cloudSaveTimeout) clearTimeout(cloudSaveTimeout);
+      cloudSaveTimeout = setTimeout(() => {
+        saveSceneDataToCloud();
+      }, 3000);
+    }
+
+    function debouncedAutoSaveCloud() {
+      autoSaveCloud();
+    }
+
+    function getSceneDataObject() {
+      return {
+        carModel: document.getElementById('carModel').value,
+        logoType: document.getElementById('logoType').value,
+        bgType: document.getElementById('bgType').value,
+        globalPos: document.getElementById('globalPos').value,
+        globalNeg: document.getElementById('globalNeg').value,
+        sceneIndex: document.getElementById('sceneSelect').value,
+        scenes: carSceneData
+      };
+    }
+
+    function saveSceneData() {
+      const data = getSceneDataObject();
+      const projectKey = 'lumaxProject_' + currentProject;
+      localStorage.setItem(projectKey, JSON.stringify(data));
+      localStorage.setItem('lumaxCurrentProject', currentProject);
+    }
+
+    function restoreSavedData() {
+      const projectKey = 'lumaxProject_' + currentProject;
+      const saved = localStorage.getItem(projectKey);
+      if (!saved) return;
+      try {
+        const data = JSON.parse(saved);
+        if (data.carModel) document.getElementById('carModel').value = data.carModel;
+        if (data.logoType) document.getElementById('logoType').value = data.logoType;
+        if (data.bgType) document.getElementById('bgType').value = data.bgType;
+        if (data.globalPos) document.getElementById('globalPos').value = data.globalPos;
+        if (data.globalNeg) document.getElementById('globalNeg').value = data.globalNeg;
+        if (typeof data.sceneIndex !== 'undefined') document.getElementById('sceneSelect').value = data.sceneIndex;
+        if (Array.isArray(data.scenes) && data.scenes.length === carSceneData.length) {
+          carSceneData.forEach((scene, i) => {
+            if (data.scenes[i]) {
+              scene.pos = data.scenes[i].pos;
+              scene.neg = data.scenes[i].neg;
+            }
+          });
+        }
+      } catch (err) {
+        console.warn('Could not restore saved scene data:', err);
+      }
+    }
+
+    function createNewProject() {
+      const projectName = prompt('Enter project name:');
+      if (!projectName || projectName.trim() === '') return;
+      const trimmedName = projectName.trim();
+      if (projectsList.includes(trimmedName)) {
+        alert('Project already exists.');
+        return;
+      }
+      saveSceneData();
+      projectsList.push(trimmedName);
+      currentProject = trimmedName;
+      document.getElementById('carModel').value = 'Hyundai N Vision 74, METALIC SILVER';
+      document.getElementById('logoType').value = 'Large red neon X shape with central gold-outlined marquee-style lettering \'LUMA\' in warm-white neon, smaller \'GARAGE\' below';
+      document.getElementById('bgType').value = 'A wide-angle, eye-level professional photograph of an industrial auto mechanic garage. The central area of the concrete floor is intentionally left empty and spacious to accommodate a car. The background wall is made of textured, dark gray bricks, creating a rugged look. The ceiling features two large, symmetrical clusters of glowing hexagonal LED light fixtures that perfectly frame the open center space. On the left and right sides, the shop is lined with organized clutter: heavy-duty metal shelving with auto parts, a blue tire changing machine, a professional workbench with a pegboard full of tools, a black rolling tool cabinet, and a welding cart. The concrete floor has realistic oil stains and a worn industrial texture. High-contrast, sharp focus, cinematic interior lighting, hyper-realistic, 8k resolution, vertical composition.';
+      document.getElementById('globalPos').value = 'Pure ASMR, hyper-reaDlistic tactile texture focus, ultra-detailed workshop sounds ambiance, MECHANICS WORK DIFFRENT JOB,';
+      document.getElementById('globalNeg').value = 'no more than 2 mechanics, woman, blurry, low quality, distorted, watermark, signature,no vocal, no background music. NO SAME WORK FOR MECHANICS';
+      updateProjectList();
+      localStorage.setItem('lumaxProjectsList', JSON.stringify(projectsList));
+      saveSceneData();
+      loadSceneContent();
+    }
+
+    function switchProject(projectName) {
+      if (projectName === currentProject) return;
+      saveSceneData();
+      currentProject = projectName;
+      const projectKey = 'lumaxProject_' + projectName;
+      const saved = localStorage.getItem(projectKey);
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (data.carModel) document.getElementById('carModel').value = data.carModel;
+          if (data.logoType) document.getElementById('logoType').value = data.logoType;
+          if (data.bgType) document.getElementById('bgType').value = data.bgType;
+          if (data.globalPos) document.getElementById('globalPos').value = data.globalPos;
+          if (data.globalNeg) document.getElementById('globalNeg').value = data.globalNeg;
+          if (typeof data.sceneIndex !== 'undefined') document.getElementById('sceneSelect').value = data.sceneIndex;
+          if (Array.isArray(data.scenes) && data.scenes.length === carSceneData.length) {
+            carSceneData.forEach((scene, i) => {
+              if (data.scenes[i]) {
+                scene.pos = data.scenes[i].pos;
+                scene.neg = data.scenes[i].neg;
+              }
+            });
+          }
+        } catch (err) {
+          console.warn('Could not load project:', err);
+        }
+      }
+      updateProjectList();
+      loadSceneContent();
+    }
+
+    function updateProjectList() {
+      const select = document.getElementById('projectSelect');
+      const deleteBtn = document.getElementById('projectDeleteBtn');
+      select.innerHTML = '';
+      projectsList.forEach(proj => {
+        const opt = document.createElement('option');
+        opt.value = proj;
+        opt.textContent = proj;
+        if (proj === currentProject) opt.selected = true;
+        select.appendChild(opt);
+      });
+      document.getElementById('currentProjectName').textContent = currentProject;
+      if (deleteBtn) {
+        deleteBtn.disabled = currentProject === 'Car Restoration';
+        deleteBtn.title = currentProject === 'Car Restoration' ? 'Cannot delete default project' : 'Delete current project';
+      }
+    }
+
+    function restoreProjectList() {
+      const saved = localStorage.getItem('lumaxProjectsList');
+      if (saved) {
+        try {
+          projectsList = JSON.parse(saved);
+        } catch (err) {
+          projectsList = ['Car Restoration'];
+        }
+      }
+      const savedProject = localStorage.getItem('lumaxCurrentProject');
+      if (savedProject && projectsList.includes(savedProject)) {
+        currentProject = savedProject;
+      }
+      updateProjectList();
+    }
+
+    function deleteProject() {
+      if (currentProject === 'Car Restoration') {
+        alert('Cannot delete default project.');
+        return;
+      }
+      if (!confirm('Delete project "' + currentProject + '"?')) return;
+      const projectKey = 'lumaxProject_' + currentProject;
+      localStorage.removeItem(projectKey);
+      projectsList = projectsList.filter(p => p !== currentProject);
+      currentProject = 'Car Restoration';
+      localStorage.setItem('lumaxProjectsList', JSON.stringify(projectsList));
+      switchProject(currentProject);
+    }
+
+
+    async function saveSceneDataToCloud() {
+      const data = getSceneDataObject();
+      try {
+        await firestoreDoc.set(data);
+        alert('Scene data saved to Firebase Cloud.');
+      } catch (err) {
+        console.error('Cloud save failed:', err);
+        alert('Cloud save failed. Check console.');
+      }
+    }
+
+    async function loadSceneDataFromCloud() {
+      try {
+        const doc = await firestoreDoc.get();
+        if (!doc.exists) {
+          alert('No cloud data found.');
+          return;
+        }
+        const data = doc.data();
+        if (data.carModel) document.getElementById('carModel').value = data.carModel;
+        if (data.logoType) document.getElementById('logoType').value = data.logoType;
+        if (data.bgType) document.getElementById('bgType').value = data.bgType;
+        if (data.globalPos) document.getElementById('globalPos').value = data.globalPos;
+        if (data.globalNeg) document.getElementById('globalNeg').value = data.globalNeg;
+        if (typeof data.sceneIndex !== 'undefined') document.getElementById('sceneSelect').value = data.sceneIndex;
+        if (Array.isArray(data.scenes) && data.scenes.length === carSceneData.length) {
+          carSceneData.forEach((scene, i) => {
+            if (data.scenes[i]) {
+              scene.pos = data.scenes[i].pos;
+              scene.neg = data.scenes[i].neg;
+            }
+          });
+        }
+        loadSceneContent();
+        saveSceneData();
+        alert('Scene data loaded from Firebase Cloud.');
+      } catch (err) {
+        console.error('Cloud load failed:', err);
+        alert('Cloud load failed. Check console.');
+      }
+    }
+
+    function exportSceneData() {
+      const data = getSceneDataObject();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'lumax-scene-data.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importSceneData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data.carModel) document.getElementById('carModel').value = data.carModel;
+          if (data.logoType) document.getElementById('logoType').value = data.logoType;
+          if (data.bgType) document.getElementById('bgType').value = data.bgType;
+          if (data.globalPos) document.getElementById('globalPos').value = data.globalPos;
+          if (data.globalNeg) document.getElementById('globalNeg').value = data.globalNeg;
+          if (typeof data.sceneIndex !== 'undefined') document.getElementById('sceneSelect').value = data.sceneIndex;
+          if (Array.isArray(data.scenes) && data.scenes.length === carSceneData.length) {
+            carSceneData.forEach((scene, i) => {
+              if (data.scenes[i]) {
+                scene.pos = data.scenes[i].pos;
+                scene.neg = data.scenes[i].neg;
+              }
+            });
+          }
+          loadSceneContent();
+          saveSceneData();
+          event.target.value = '';
+        } catch (err) {
+          alert('Invalid JSON file.');
+        }
+      };
+      reader.readAsText(file);
     }
 
     function copyPrompts() {
